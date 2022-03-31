@@ -966,11 +966,13 @@ rtp_error_t uvgrtp::rtcp::handle_app_packet(uint8_t* packet, size_t size,
         delete   participants_[frame->ssrc]->app_frame;
     }
 
+    // Allocating 4 extra bytes
     frame->payload = new uint8_t[frame->header.length * 4];
-
+    memset(frame->payload, 0x00, frame->header.length * 4);
     memcpy(frame->name, &packet[RTCP_HEADER_SIZE + SSRC_CSRC_SIZE], APP_NAME_SIZE);
+    //  length field excludes header bytes 
     memcpy(frame->payload, &packet[RTCP_HEADER_SIZE + SSRC_CSRC_SIZE + APP_NAME_SIZE],
-        frame->header.length * 4 - RTCP_HEADER_SIZE + SSRC_CSRC_SIZE + APP_NAME_SIZE);
+        frame->header.length * 4 - /*RTCP_HEADER_SIZE*/ + SSRC_CSRC_SIZE + APP_NAME_SIZE);
 
     if (app_hook_)
     {
